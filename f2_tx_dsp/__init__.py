@@ -1,5 +1,5 @@
 # f2_dsp class 
-# Last modification by Marko Kosunen, marko.kosunen@aalto.fi, 03.08.2018 22:34
+# Last modification by Marko Kosunen, marko.kosunen@aalto.fi, 07.08.2018 17:48
 import numpy as np
 import pandas as pd
 import scipy.signal as sig
