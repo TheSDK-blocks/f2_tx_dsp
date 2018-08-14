@@ -1,5 +1,5 @@
 # f2_dsp class 
-# Last modification by Marko Kosunen, marko.kosunen@aalto.fi, 07.08.2018 17:48
+# Last modification by Marko Kosunen, marko.kosunen@aalto.fi, 14.08.2018 10:54
 import numpy as np
 import pandas as pd
 import scipy.signal as sig
@@ -10,6 +10,7 @@ import time
 
 from thesdk import *
 from verilog import *
+from f2_util_classes import *
 import signal_generator_802_11n as sg80211n
 
 
@@ -23,7 +24,6 @@ class f2_tx_dsp(verilog,thesdk):
         self.Txbits=9
         self.Users=4                     #This is currently fixed by implementation
         #Matrix of [Users,time,1]
-        self.iptr_A = refptr() 
         self.model='sv';                  #can be set externally, but is not propagated
         self.par= False                  #by default, no parallel processing
 
@@ -34,6 +34,8 @@ class f2_tx_dsp(verilog,thesdk):
             parent=arg[0]
             self.copy_propval(parent,self.proplist)
             self.parent =parent;
+
+        self.iptr_A = iofifosigs(**{'users':self.Users})
 
         self._Z_real_t=[ refptr() for i in range(self.Txantennas) ]
         self._Z_real_b=[ refptr() for i in range(self.Txantennas) ]
@@ -95,9 +97,9 @@ class f2_tx_dsp(verilog,thesdk):
           pass
         for i in range(self.Users):
             if i==0:
-                indata=self.iptr_A.Value[i,:,0].reshape(-1,1)
+                indata=self.iptr_A.data[i].udata.Value.reshape(-1,1)
             else:
-                indata=np.r_['1',indata,self.iptr_A.Value[i,:,0].reshape(-1,1)]
+                indata=np.r_['1',indata,self.iptr_A.data[i].udata.Value.reshape(-1,1)]
 
         fid=open(self._infile,'wb')
         np.savetxt(fid,indata.view(float),fmt='%i', delimiter='\t')
@@ -114,6 +116,4 @@ class f2_tx_dsp(verilog,thesdk):
             self._Z_real_b[i].Value=fromfile.values[:,i*self.Txantennas+1].astype('int').reshape(-1,1)
             self._Z_imag_t[i].Value=fromfile.values[:,i*self.Txantennas+2].astype('str').reshape(-1,1)
             self._Z_imag_b[i].Value=fromfile.values[:,i*self.Txantennas+3].astype('int').reshape(-1,1)
-        print( self._Z_real_t[0].Value)
-        print( self._Z_real_b[0].Value)
 
