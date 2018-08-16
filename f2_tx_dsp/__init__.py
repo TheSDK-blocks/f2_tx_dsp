@@ -1,5 +1,5 @@
 # f2_dsp class 
-# Last modification by Marko Kosunen, marko.kosunen@aalto.fi, 14.08.2018 10:54
+# Last modification by Marko Kosunen, marko.kosunen@aalto.fi, 15.08.2018 13:53
 import numpy as np
 import pandas as pd
 import scipy.signal as sig
@@ -74,6 +74,7 @@ class f2_tx_dsp(verilog,thesdk):
             self.queue=arg[0]  #multiprocessing.queue as the first argument
         if self.model=='py':
             self.process_input()
+            print("shit happens")
         else: 
           self.write_infile()
           self.run_verilog()
