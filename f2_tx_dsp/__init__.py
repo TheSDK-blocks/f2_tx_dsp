@@ -1,5 +1,5 @@
 # f2_dsp class 
-# Last modification by Marko Kosunen, marko.kosunen@aalto.fi, 15.08.2018 13:53
+# Last modification by Marko Kosunen, marko.kosunen@aalto.fi, 15.08.2018 17:29
 import numpy as np
 import pandas as pd
 import scipy.signal as sig
@@ -15,6 +15,10 @@ import signal_generator_802_11n as sg80211n
 
 
 class f2_tx_dsp(verilog,thesdk):
+    @property
+    def _classfile(self):
+        return os.path.dirname(os.path.realpath(__file__)) + "/"+__name__
+
     def __init__(self,*arg): 
         self.proplist = [ 'Rs', 'Rs_dsp', 'Txbits'];    #properties that can be propagated from parent
         self.Rs = 160e6;                 # sampling frequency
@@ -28,7 +32,6 @@ class f2_tx_dsp(verilog,thesdk):
         self.par= False                  #by default, no parallel processing
 
         self.queue= []                   #by default, no parallel processing
-        self._classfile=os.path.dirname(os.path.realpath(__file__)) + "/"+__name__
         self.DEBUG= False
         if len(arg)>=1:
             parent=arg[0]
@@ -42,9 +45,6 @@ class f2_tx_dsp(verilog,thesdk):
         self._Z_imag_t=[ refptr() for i in range(self.Txantennas) ]
         self._Z_imag_b=[ refptr() for i in range(self.Txantennas) ]
 
-
-        #self._decimated.Value=[refptr() for _ in range(4)]
-        #self._index=refptr()
         self.init()
     
     def init(self):
@@ -74,7 +74,6 @@ class f2_tx_dsp(verilog,thesdk):
             self.queue=arg[0]  #multiprocessing.queue as the first argument
         if self.model=='py':
             self.process_input()
-            print("shit happens")
         else: 
           self.write_infile()
           self.run_verilog()
