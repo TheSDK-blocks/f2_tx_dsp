@@ -1,5 +1,5 @@
 # f2_dsp class 
-# Last modification by Marko Kosunen, marko.kosunen@aalto.fi, 17.08.2018 20:19
+# Last modification by Marko Kosunen, marko.kosunen@aalto.fi, 18.08.2018 13:00
 import numpy as np
 import pandas as pd
 import scipy.signal as sig
@@ -76,13 +76,13 @@ class f2_tx_dsp(verilog,thesdk):
             self.process_input()
         elif self.model=='sv':
             self.write_infile()
-            self.ofile=verilog_iofile(self,**{'file':'Z'})
-            self._outfile=self.ofile.name
+            #Object to have handle for it in other methods
+            #Should be handled with a selector method using 'file' attribute
+            self._ofile=verilog_iofile(self,**{'name':'Z'})
+            self._ofile.simparam='-g g_outfile='+self._ofile.file
             self.run_verilog()
-            self.ifile.remove()
             self.read_outfile()
-            self.ofile.remove()
-
+            [ _.remove() for _ in self.iofiles ]
     def process_input(self):
         self.print_log({'type':"F", 'msg':"Python model not yet implemented"}) 
 
@@ -93,20 +93,21 @@ class f2_tx_dsp(verilog,thesdk):
             else:
                 indata=np.r_['1',indata,self.iptr_A.data[i].udata.Value.reshape(-1,1)]
         if self.model=='sv':
-            self.ifile=verilog_iofile(self,**{'file':'A','data':indata})
-            print(self.ifile.simparam)
+            #This adds an iofile to self.iiofiles list
+            a=verilog_iofile(self,**{'name':'A','data':indata})
+            a.simparam='-g g_infile='+a.file
+            a.write()
             indata=None #Clear variable to save memory
-            self._infile=self.ifile.name
-            self.ifile.remove()
-            self.ifile.write()
         else:
             pass
 
     def read_outfile(self):
-        self.ofile.read(**{'dtype':'object'})
+        #Handle the ofiles here as you see the best
+        a=list(filter(lambda x:x.name=='Z',self.iofiles))[0]
+        a.read(**{'dtype':'object'})
         for i in range(self.Txantennas):
-            self._Z_real_t[i].Value=self.ofile.data[:,i*self.Txantennas+0].astype('str').reshape(-1,1)
-            self._Z_real_b[i].Value=self.ofile.data[:,i*self.Txantennas+1].astype('int').reshape(-1,1)
-            self._Z_imag_t[i].Value=self.ofile.data[:,i*self.Txantennas+2].astype('str').reshape(-1,1)
-            self._Z_imag_b[i].Value=self.ofile.data[:,i*self.Txantennas+3].astype('int').reshape(-1,1)
+            self._Z_real_t[i].Value=a.data[:,i*self.Txantennas+0].astype('str').reshape(-1,1)
+            self._Z_real_b[i].Value=a.data[:,i*self.Txantennas+1].astype('int').reshape(-1,1)
+            self._Z_imag_t[i].Value=a.data[:,i*self.Txantennas+2].astype('str').reshape(-1,1)
+            self._Z_imag_b[i].Value=a.data[:,i*self.Txantennas+3].astype('int').reshape(-1,1)
 
