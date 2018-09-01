@@ -1,5 +1,5 @@
 # f2_dsp class 
-# Last modification by Marko Kosunen, marko.kosunen@aalto.fi, 18.08.2018 13:00
+# Last modification by Marko Kosunen, marko.kosunen@aalto.fi, 20.08.2018 20:08
 import numpy as np
 import pandas as pd
 import scipy.signal as sig
@@ -53,8 +53,6 @@ class f2_tx_dsp(verilog,thesdk):
 
         #Here's how we sim't for the tapeout
         self._vlogparameters=dict([ ('g_Rs_high',self.Rs), ('g_Rs_low',self.Rs_dsp), 
-            ('g_Rs_high'          , 16*20.0e6),
-            ('g_Rs_low'           , 20.0e6),
             ('g_shift'            , 0),
             ('g_scale0'           , 8),
             ('g_scale1'           , 2),
@@ -78,8 +76,8 @@ class f2_tx_dsp(verilog,thesdk):
             self.write_infile()
             #Object to have handle for it in other methods
             #Should be handled with a selector method using 'file' attribute
-            self._ofile=verilog_iofile(self,**{'name':'Z'})
-            self._ofile.simparam='-g g_outfile='+self._ofile.file
+            a=verilog_iofile(self,**{'name':'Z'})
+            a.simparam='-g g_outfile='+a.file
             self.run_verilog()
             self.read_outfile()
             [ _.remove() for _ in self.iofiles ]
@@ -95,6 +93,7 @@ class f2_tx_dsp(verilog,thesdk):
         if self.model=='sv':
             #This adds an iofile to self.iiofiles list
             a=verilog_iofile(self,**{'name':'A','data':indata})
+            print(self.iofiles)
             a.simparam='-g g_infile='+a.file
             a.write()
             indata=None #Clear variable to save memory
