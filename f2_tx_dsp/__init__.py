@@ -1,5 +1,5 @@
 # f2_dsp class 
-# Last modification by Marko Kosunen, marko.kosunen@aalto.fi, 20.08.2018 20:08
+# Last modification by Marko Kosunen, marko.kosunen@aalto.fi, 12.11.2018 15:09
 import numpy as np
 import pandas as pd
 import scipy.signal as sig
@@ -20,7 +20,7 @@ class f2_tx_dsp(verilog,thesdk):
         return os.path.dirname(os.path.realpath(__file__)) + "/"+__name__
 
     def __init__(self,*arg): 
-        self.proplist = [ 'Rs', 'Rs_dsp', 'Txbits'];    #properties that can be propagated from parent
+        self.proplist = [ 'Rs', 'Rs_dsp', 'Txbits', 'Users' ];    #properties that can be propagated from parent
         self.Rs = 160e6;                 # sampling frequency
         self.Rs_dsp=20e6
         #These are fixed
