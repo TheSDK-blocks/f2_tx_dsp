@@ -50,10 +50,10 @@ class f2_tx_dsp(verilog,thesdk):
 
         ## Connections should be only a function of propagated parameters
         self.iptr_A = iofifosigs(**{'users':self.Users})
-        self._Z_real_t=[ refptr() for i in range(self.Txantennas) ]
-        self._Z_real_b=[ refptr() for i in range(self.Txantennas) ]
-        self._Z_imag_t=[ refptr() for i in range(self.Txantennas) ]
-        self._Z_imag_b=[ refptr() for i in range(self.Txantennas) ]
+        self._Z_real_t=[ IO() for i in range(self.Txantennas) ]
+        self._Z_real_b=[ IO() for i in range(self.Txantennas) ]
+        self._Z_imag_t=[ IO() for i in range(self.Txantennas) ]
+        self._Z_imag_b=[ IO() for i in range(self.Txantennas) ]
 
         #Add Tx paths
         self.tx_paths=[ f2_tx_path(self) for i in range(self.Txantennas)]
@@ -119,9 +119,9 @@ class f2_tx_dsp(verilog,thesdk):
     def write_infile(self,**kwargs):
         for i in range(self.Users):
             if i==0:
-                indata=self.iptr_A.data[i].udata.Value.reshape(-1,1)
+                indata=self.iptr_A.data[i].udata.Data.reshape(-1,1)
             else:
-                indata=np.r_['1',indata,self.iptr_A.data[i].udata.Value.reshape(-1,1)]
+                indata=np.r_['1',indata,self.iptr_A.data[i].udata.Data.reshape(-1,1)]
         if self.model=='sv':
             #This adds an iofile to self.iofiles list
             a=verilog_iofile(self,**{'name':'A','data':indata})
@@ -136,8 +136,8 @@ class f2_tx_dsp(verilog,thesdk):
         a=list(filter(lambda x:x.name=='Z',self.iofiles))[0]
         a.read(**{'dtype':'object'})
         for i in range(self.Txantennas):
-            self._Z_real_t[i].Value=a.data[:,i*self.Txantennas+0].astype('str').reshape(-1,1)
-            self._Z_real_b[i].Value=a.data[:,i*self.Txantennas+1].astype('int').reshape(-1,1)
-            self._Z_imag_t[i].Value=a.data[:,i*self.Txantennas+2].astype('str').reshape(-1,1)
-            self._Z_imag_b[i].Value=a.data[:,i*self.Txantennas+3].astype('int').reshape(-1,1)
+            self._Z_real_t[i].Data=a.data[:,i*self.Txantennas+0].astype('str').reshape(-1,1)
+            self._Z_real_b[i].Data=a.data[:,i*self.Txantennas+1].astype('int').reshape(-1,1)
+            self._Z_imag_t[i].Data=a.data[:,i*self.Txantennas+2].astype('str').reshape(-1,1)
+            self._Z_imag_b[i].Data=a.data[:,i*self.Txantennas+3].astype('int').reshape(-1,1)
 
