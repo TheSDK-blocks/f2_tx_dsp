@@ -21,7 +21,15 @@ class f2_tx_dsp(verilog,thesdk):
         return os.path.dirname(os.path.realpath(__file__)) + "/"+__name__
 
     def __init__(self,*arg): 
-        self.proplist = [ 'Rs', 'Rs_dsp', 'Txbits', 'Users', 'interpolator_scales', 'interpolator_cic3shift' 'Txantennas' ];    #properties that can be propagated from parent
+        self.proplist = [ 
+                'Rs',
+                'Rs_dsp', 
+                'Txbits', 
+                'Users', 
+                'dsp_interpolator_scales', 
+                'dsp_interpolator_cic3shift' 
+                'Txantennas' 
+                ];    #properties that can be propagated from parent
         self.Rs = 160e6;                        # sampling frequency
         self.Rs_dsp=20e6
         #These are fixed
@@ -29,14 +37,14 @@ class f2_tx_dsp(verilog,thesdk):
         self.Txbits=9
         ####
         self.Users=4                           #This is currently fixed by implementation
-        self.interpolator_scales=[8,2,2,512]   #This works with the current hardware
-        self.interpolator_cic3shift=4
+        self.dsp_interpolator_scales=[8,2,2,512]   #This works with the current hardware
+        self.dsp_interpolator_cic3shift=4
+        self.dsp_interpolator_mode=''          # If not given, it will be derived
         self.user_sum_mode    = 0              #Wether to sum users or not
         self.user_select_index= 0              #by default, no parallel processing
         self.user_spread_mode = 0
         self.user_sum_mode    = 0
         self.user_select_index= 0
-        self.interpolator_mode= 4
         self.dac_data_mode   = 6
         #Matrix of [Users,time,1]
         self.model='py';                  #can be set externally, but is not propagated
@@ -60,7 +68,8 @@ class f2_tx_dsp(verilog,thesdk):
 
         # Interpolator calculates the mode absed on the sampling rates.
         # It can be utilized here
-        self.interpolator_mode=self.tx_paths[0].interpolator_mode
+        if not self.dsp_interpolator_mode:
+            self.dsp_interpolator_mode=self.tx_paths[0].interpolator_mode
         self._vlogmodulefiles =list(['clkdiv_n_2_4_8.v', 'AsyncResetReg.v'])
 
         # Create connections
@@ -82,15 +91,15 @@ class f2_tx_dsp(verilog,thesdk):
         #Here's how we sim't for the tapeout
         self._vlogparameters=dict([ ('g_Rs_high',self.Rs), ('g_Rs_low',self.Rs_dsp), 
             ('g_shift'            , 0                          ),
-            ('g_scale0'           , self.interpolator_scales[0]),
-            ('g_scale1'           , self.interpolator_scales[1]),
-            ('g_scale2'           , self.interpolator_scales[2]),
-            ('g_scale3'           , self.interpolator_scales[3]),
-            ('g_cic3shift'        , self.interpolator_cic3shift),
+            ('g_scale0'           , self.dsp_interpolator_scales[0]),
+            ('g_scale1'           , self.dsp_interpolator_scales[1]),
+            ('g_scale2'           , self.dsp_interpolator_scales[2]),
+            ('g_scale3'           , self.dsp_interpolator_scales[3]),
+            ('g_cic3shift'        , self.dsp_interpolator_cic3shift),
             ('g_user_spread_mode' , self.user_spread_mode      ),
             ('g_user_sum_mode'    , self.user_sum_mode         ), 
             ('g_user_select_index', self.user_select_index     ),
-            ('g_interpolator_mode', self.interpolator_mode     ),
+            ('g_interpolator_mode', self.dsp_interpolator_mode     ),
             ('g_dac_data_mode'    , self.dac_data_mode         ) 
             ])
 
